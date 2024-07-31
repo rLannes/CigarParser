@@ -4,6 +4,16 @@ A Rust library to parse CIGAR strings and, in particular, identify junction posi
 
 ## How to Use
 
+in your toml add this dependancy
+```rust
+CigarParser = { git = "https://github.com/rLannes/CigarParser" }
+```
+load the crate and the module:
+```rust
+extern crate CigarParser;
+use CigarParser::cigar::Cigar;
+```
+
 You have two options to create a Cigar object:
 
 ```rust
