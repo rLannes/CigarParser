@@ -8,7 +8,9 @@ in your toml add this dependancy
 ```rust
 CigarParser = { git = "https://github.com/rLannes/CigarParser" }
 ```
-load the crate and the module:
+
+This crate exposes the Cigar structure that you can load using the following:
+
 ```rust
 extern crate CigarParser;
 use CigarParser::cigar::Cigar;
