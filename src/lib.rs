@@ -1,5 +1,5 @@
 
-mod cigar{
+pub mod cigar{
     
     use std::str::FromStr;
 
