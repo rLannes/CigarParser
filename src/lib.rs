@@ -177,7 +177,7 @@ pub mod cigar{
                             ref_pos += n;
                             results.push(ref_pos);
                             },
-                        CigarOperation::Match(n) | CigarOperation::Insertion(n) | CigarOperation::Soft(n) => { ref_pos += n; }, 
+                        CigarOperation::Match(n) | CigarOperation::Insertion(n) => { ref_pos += n; }, 
                         _  => ()
                     }
                 }
