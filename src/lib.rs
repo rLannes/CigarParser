@@ -225,7 +225,7 @@ pub mod cigar{
             ref_pos
         } 
 
-        }
+        
     }
 
     #[cfg(test)]
