@@ -241,7 +241,8 @@ pub mod cigar{
         fn test_pos(){
             let cig = Cigar::from("35M110N45M3I45M10N");
             let results = cig.get_skipped_pos_on_ref(&500);
-            assert_eq!(results, Some(vec![535, 645, 738, 748]))
+            println!("{:?}", results);
+            assert_eq!(results, Some(vec![535, 645, 735, 745]))
         }
         #[test]
         fn test_pos_none(){
