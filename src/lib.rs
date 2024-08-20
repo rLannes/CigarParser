@@ -214,6 +214,18 @@ pub mod cigar{
             }
             flag
         } 
+        pub fn get_end_of_aln(&self, pos: &i64) -> i64{
+            let mut ref_pos = *pos;
+            for cigar_op in self.cigar.iter(){
+                match cigar_op{
+                    CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) | CigarOperation::Match(n)=> {ref_pos += n;},
+                    _ => (), // does not consme the reference
+                }
+            }
+            ref_pos
+        } 
+
+        }
     }
 
     #[cfg(test)]
