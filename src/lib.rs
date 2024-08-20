@@ -178,7 +178,6 @@ pub mod cigar{
                             results.push(ref_pos);
                             },
                         CigarOperation::Match(n) | CigarOperation::Deletion(n)  => { ref_pos += n; }, 
-                        CigarOperation::Soft(n) => (), // I am confuse by the difference here from IGV and the specification of CIGAR
                         _  => ()
                     }
                 }
