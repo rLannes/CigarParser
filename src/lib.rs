@@ -195,7 +195,7 @@ pub mod cigar{
 
         /// this function return true if the reads fully match region defined by st(art) and end.
         /// inclusive of both end
-        /// st >= interval, en <= intervall
+        /// st >= interval, en <= intervall // TODO make end exclusive
         /// st <= end,  st == end should work as expected. 
         pub fn does_it_match_an_intervall(&self, pos: &i64, st:i64, end:i64) -> bool{
             let mut ref_pos = *pos;
@@ -204,7 +204,7 @@ pub mod cigar{
                 match cigar_op{
                     CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {ref_pos += n;},
                     CigarOperation::Match(n) => {
-                        if (st >= ref_pos) & (end <= ref_pos + n) {
+                        if (st >= ref_pos) & (end < ref_pos + n) {
                            flag = true;
                         }
                         ref_pos += n;
@@ -241,7 +241,6 @@ pub mod cigar{
         fn test_pos(){
             let cig = Cigar::from("35M110N45M3I45M10N");
             let results = cig.get_skipped_pos_on_ref(&500);
-            println!("{:?}", results);
             assert_eq!(results, Some(vec![535, 645, 735, 745]))
         }
         #[test]
@@ -266,7 +265,7 @@ pub mod cigar{
         #[test]
         fn test_match_outofbound(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 550, 581);
+            let results = cig.does_it_match_an_intervall(&500, 550, 580);
             assert_eq!(results, false)
             //assert_eq!(results, None)
         } 
@@ -280,7 +279,7 @@ pub mod cigar{
         #[test]  
         fn test_match_justinbound(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 575, 580);
+            let results = cig.does_it_match_an_intervall(&500, 575, 579);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
