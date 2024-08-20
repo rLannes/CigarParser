@@ -204,7 +204,7 @@ pub mod cigar{
                 match cigar_op{
                     CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {ref_pos += n;},
                     CigarOperation::Match(n) => {
-                        if (st >= ref_pos) & (end < ref_pos + n) {
+                        if (st >= ref_pos) & (end <= ref_pos + n) {
                            flag = true;
                         }
                         ref_pos += n;
