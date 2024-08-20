@@ -177,7 +177,8 @@ pub mod cigar{
                             ref_pos += n;
                             results.push(ref_pos);
                             },
-                        CigarOperation::Match(n) | CigarOperation::Insertion(n) | CigarOperation::Soft(n) => { ref_pos += n; }, 
+                        CigarOperation::Match(n) | CigarOperation::Insertion(n)  => { ref_pos += n; }, 
+                        CigarOperation::Soft(n) => (), // I am confuse by the difference here from IGV and the specification of CIGAR
                         _  => ()
                     }
                 }
@@ -192,6 +193,28 @@ pub mod cigar{
                 None
             }
         }
+
+        /// this function return true if the reads fully match region defined by st(art) and end.
+        /// inclusive of both end
+        /// st >= interval, en <= intervall
+        /// st <= end,  st == end should work as expected. 
+        pub fn does_it_match_an_intervall(&self, pos: &i64, st:i64, end:i64) -> bool{
+            let mut ref_pos = *pos;
+            let mut flag: bool = false;
+            for cigar_op in self.cigar.iter(){
+                match cigar_op{
+                    CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {ref_pos += n;},
+                    CigarOperation::Match(n) => {
+                        if (st >= ref_pos) & (end <= ref_pos + n) {
+                           flag = true;
+                        }
+                        ref_pos += n;
+                    },
+                    _ => (), // does not consme the reference
+                }
+            }
+            flag
+        } 
     }
 
     #[cfg(test)]
@@ -226,6 +249,40 @@ pub mod cigar{
             let cig = Cigar::from("35M45M3I45M");
             let results = cig.get_skipped_pos_on_ref(&500);
             assert_eq!(results, None)
+        }   
+        #[test]
+        fn test_pos_2(){
+            let cig = Cigar::from("2S80M53373N169M");
+            let results = cig.get_skipped_pos_on_ref(&16946);
+            //assert_eq!(results, None)
+        }   
+        #[test]
+        fn test_match_1(){
+            let cig = Cigar::from("2S80M53373N169M");
+            let results = cig.does_it_match_an_intervall(&500, 550, 560);
+            //println!("{:?}", results);
+            assert_eq!(results, true)
+        }   
+        #[test]
+        fn test_match_outofbound(){
+            let cig = Cigar::from("2S80M53373N169M");
+            let results = cig.does_it_match_an_intervall(&500, 550, 581);
+            assert_eq!(results, false)
+            //assert_eq!(results, None)
+        } 
+        #[test]  
+        fn test_match_s_eq_e(){
+            let cig = Cigar::from("2S80M53373N169M");
+            let results = cig.does_it_match_an_intervall(&500, 550, 550);
+            assert_eq!(results, true)
+            //assert_eq!(results, None)
+        }   
+        #[test]  
+        fn test_match_justinbound(){
+            let cig = Cigar::from("2S80M53373N169M");
+            let results = cig.does_it_match_an_intervall(&500, 575, 580);
+            assert_eq!(results, true)
+            //assert_eq!(results, None)
         }   
     }
 }
