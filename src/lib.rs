@@ -201,7 +201,7 @@ pub mod cigar{
                 }
 
             }
-            if *strand == Strand::Minus{
+            if *strand == Strand::Plus{
                 match self.cigar.last(){
                     Some(CigarOperation::Soft(n)) => {return true;},
                     _ => {return false;}
