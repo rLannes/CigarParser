@@ -1,6 +1,6 @@
 
 pub mod cigar{
-    
+    use strand_specifier_lib::{Strand};
     use std::str::FromStr;
 
     #[derive(Debug, PartialEq)]
@@ -193,6 +193,24 @@ pub mod cigar{
             }
         }
 
+        pub fn soft_clipped_end(&self, strand: &Strand) -> bool{
+            if *strand == Strand::Minus{
+                match self.cigar[0]{
+                    CigarOperation::Soft (n) => {return true;},
+                    _ => {return false;}
+                }
+
+            }
+            if *strand == Strand::Minus{
+                match self.cigar.last(){
+                    Some(CigarOperation::Soft(n)) => {return true;},
+                    _ => {return false;}
+                }
+
+            }
+            false
+        }
+
         /// this function return true if the reads fully match region defined by st(art) and end.
         /// inclusive of both end
         /// st >= interval, en <= intervall // TODO make end exclusive
@@ -214,6 +232,7 @@ pub mod cigar{
             }
             flag
         } 
+        
         pub fn get_end_of_aln(&self, pos: &i64) -> i64{
             let mut ref_pos = *pos;
             for cigar_op in self.cigar.iter(){
