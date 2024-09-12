@@ -193,17 +193,17 @@ pub mod cigar{
             }
         }
 
-        pub fn soft_clipped_end(&self, strand: &Strand) -> bool{
+        pub fn soft_clipped_end(&self, strand: &Strand, delta: i64) -> bool{
             if *strand == Strand::Minus{
                 match self.cigar[0]{
-                    CigarOperation::Soft (n) => {return true;},
+                    CigarOperation::Soft (n) => {if n > delta{return true;}},
                     _ => {return false;}
                 }
 
             }
             if *strand == Strand::Plus{
                 match self.cigar.last(){
-                    Some(CigarOperation::Soft(n)) => {return true;},
+                    Some(CigarOperation::Soft(n)) => {{if *n > delta{return true;}}},
                     _ => {return false;}
                 }
 
@@ -308,9 +308,23 @@ pub mod cigar{
             //assert_eq!(results, None)
         }   
         #[test]  
+        fn soft(){
+            let cig = Cigar::from("100M45S");
+            let results = cig.soft_clipped_end(&Strand::Plus);
+            assert_eq!(results, true)
+            //assert_eq!(results, None)
+        }   
+        #[test]  
         fn test_match_justinbound(){
-            let cig = Cigar::from("2S80M53373N169M");
+            let cig = Cigar::from("2S80M53373N169M45S");
             let results = cig.does_it_match_an_intervall(&500, 575, 579);
+            assert_eq!(results, true)
+            //assert_eq!(results, None)
+        }   
+        #[test]  
+        fn softR(){
+            let cig = Cigar::from("2S80M53373N169M45S");
+            let results = cig.soft_clipped_end(&Strand::Minus);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
