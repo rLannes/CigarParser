@@ -1,7 +1,9 @@
 
+
 pub mod cigar{
     use strand_specifier_lib::{Strand};
     use std::str::FromStr;
+    use std::fmt;
 
     #[derive(Debug, PartialEq)]
     /// Basic Cigar Operation, does not accept "X" or "=".
@@ -246,6 +248,28 @@ pub mod cigar{
 
         
     }
+
+    impl fmt::Display for Cigar {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            let mut tobeformatted= Vec::new();
+            for op in &self.cigar{
+                let x = match op{
+                    CigarOperation::Match(length) => format!("M{}", length),
+                    CigarOperation::Insertion(length) => format!("I{}", length),
+                    CigarOperation::Deletion(length) => format!("D{}", length),
+                    CigarOperation::Nskipped(length) => format!("N{}", length),
+                    CigarOperation::Soft(length) => format!("S{}", length),
+                    CigarOperation::Hard(length) => format!("H{}", length),
+                    CigarOperation::Padded(length) => format!("P{}", length),
+                    CigarOperation::Unaligned => format!("*"),
+                    _ => panic!("Invalid CIGAR operation"),
+                };
+                tobeformatted.push(x);
+            }
+            write!(f, "{}", tobeformatted.join(""))
+        }
+    }
+
 
     #[cfg(test)]
     mod tests {
