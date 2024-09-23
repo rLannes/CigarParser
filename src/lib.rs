@@ -195,6 +195,25 @@ pub mod cigar{
             }
         }
 
+        pub fn get_soft_clipped_N(&self, strand: &Strand) -> Option<i64>{
+            let mut soft_n = None;
+            if *strand == Strand::Minus{
+                match self.cigar[0]{
+                    CigarOperation::Soft (n) => {soft_n = Some(n)},
+                    _ => ()
+                }
+
+            }
+            if *strand == Strand::Plus{
+                match self.cigar.last(){
+                    Some(CigarOperation::Soft(n)) => {soft_n = Some(*n)},
+                    _ => ()
+                }
+
+            }
+            soft_n
+        }
+
         pub fn soft_clipped_end(&self, strand: &Strand, delta: i64) -> bool{
             if *strand == Strand::Minus{
                 match self.cigar[0]{
