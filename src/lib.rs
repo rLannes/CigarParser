@@ -265,6 +265,26 @@ pub mod cigar{
             ref_pos
         } 
 
+        pub fn get_reference_cover(&self, st:i64)-> Vec<i64>{
+            let mut ref_pos = st;
+            let mut result : Vec<i64> = Vec::new();
+            for cigar_op in self.cigar.iter(){
+                match cigar_op{
+                CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {
+                        ref_pos += n;
+                    },
+                    CigarOperation::Match(n) =>{
+                        result.push(ref_pos);
+                        result.push(ref_pos + n);
+                        ref_pos += n;
+                    },
+                    _ => ()
+                }
+            }
+            
+        result
+    }
+
         
     }
 
