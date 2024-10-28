@@ -293,13 +293,13 @@ pub mod cigar{
             let mut tobeformatted= Vec::new();
             for op in &self.cigar{
                 let x = match op{
-                    CigarOperation::Match(length) => format!("M{}", length),
-                    CigarOperation::Insertion(length) => format!("I{}", length),
-                    CigarOperation::Deletion(length) => format!("D{}", length),
-                    CigarOperation::Nskipped(length) => format!("N{}", length),
-                    CigarOperation::Soft(length) => format!("S{}", length),
-                    CigarOperation::Hard(length) => format!("H{}", length),
-                    CigarOperation::Padded(length) => format!("P{}", length),
+                    CigarOperation::Match(length) => format!("{}M", length),
+                    CigarOperation::Insertion(length) => format!("{}I", length),
+                    CigarOperation::Deletion(length) => format!("{}D", length),
+                    CigarOperation::Nskipped(length) => format!("{}N", length),
+                    CigarOperation::Soft(length) => format!("{}S", length),
+                    CigarOperation::Hard(length) => format!("{}H", length),
+                    CigarOperation::Padded(length) => format!("{}P", length),
                     CigarOperation::Unaligned => format!("*"),
                     _ => panic!("Invalid CIGAR operation"),
                 };
