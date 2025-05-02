@@ -1,6 +1,8 @@
 
 
+
 pub mod cigar{
+    #![allow(dead_code)]
     use strand_specifier_lib::{Strand};
     use std::str::FromStr;
     use std::fmt;
@@ -169,6 +171,36 @@ pub mod cigar{
             // test skipped so we avoid allocation if we don't need it
             if self.has_skipped(){
                 let mut ref_pos = *pos; // copy
+                let mut results = Vec::new();
+
+                for cigar_op in self.cigar.iter(){
+                    /// By definition it is impossible to have to consecutive same (N) operation.
+                    match cigar_op{
+                        CigarOperation::Nskipped(n) => {
+                            results.push(ref_pos);
+                            ref_pos += n;
+                            results.push(ref_pos);
+                            },
+                        CigarOperation::Match(n) | CigarOperation::Deletion(n) => { ref_pos += n; }, 
+                        _  => ()
+                    }
+                }
+                if results.is_empty(){ // should never happend, but I do like fail safe
+                    None
+                }
+                else{
+                    Some(results)
+                }
+            }
+            else{
+                None
+            }
+        }
+
+        fn get_junction_position(&self, pos: i64) -> Option<Vec<i64>>{
+            // test skipped so we avoid allocation if we don't need it
+            if self.has_skipped(){
+                let mut ref_pos = pos; // copy
                 let mut results = Vec::new();
 
                 for cigar_op in self.cigar.iter(){
@@ -373,7 +405,7 @@ pub mod cigar{
         #[test]  
         fn soft(){
             let cig = Cigar::from("100M45S");
-            let results = cig.soft_clipped_end(&Strand::Plus);
+            let results = cig.soft_clipped_end(&Strand::Plus, 10);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
@@ -387,7 +419,7 @@ pub mod cigar{
         #[test]  
         fn softR(){
             let cig = Cigar::from("2S80M53373N169M45S");
-            let results = cig.soft_clipped_end(&Strand::Minus);
+            let results = cig.soft_clipped_end(&Strand::Minus, 10);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   

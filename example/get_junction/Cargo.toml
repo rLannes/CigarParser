@@ -1,0 +1,10 @@
+[package]
+name = "get_junction"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rust-htslib = { version = "0.45.0"}
+CigarParser = { git = "https://github.com/rLannes/CigarParser" }
+clap = { version = "4.5.16", features = ["derive"] }
+strand_specifier = { git = "https://github.com/rLannes/BAMstrandSpecifier" }
