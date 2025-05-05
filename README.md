@@ -28,8 +28,33 @@ let cig = Cigar::from("35M110N45M3I45M10N11M");
 To get the junction positions, if any, use:.
 ```rust
 let cig = Cigar::from("35M110N45M3I45M10N");
-let results = cig.get_skipped_pos_on_ref(&500);
+let results = cig.get_junction_position(&500);// 500 is the starting position of the alignment
 assert_eq!(results, Some(vec![535, 645, 738, 748]));
 ```
-I wrote this as a standalone library so you can integrate it with any tools that read BAM files, such as rust-htslib.
+
+To Compute the coverage one can parse each read instead of using the pileup method.
+```rust
+let cig = Cigar::from("5M15N5M");
+let results = cig.get_reference_cover(&500); // 500 is the starting position of the alignment
+assert_eq!(results, Some(vec![500, 501, 502, 503, 504, 519, 520, 521, 522, 523]));
+```
+
+To check if the read overlap fully an interval: 
+```rust
+let cig = Cigar::from("5M15N5M");
+let results = cig.does_it_match_an_intervall(&500, 501, 503);// 500 is the starting position of the alignment
+assert_eq!(results, true);
+```
+
+To check if the read end of the alignment : 
+```rust
+let cig = Cigar::from("5M15N5M");
+let results = cig.get_end_of_aln(&500);// 500 is the starting position of the alignment
+assert_eq!(results, 519);
+```
+
+get_end_of_aln
+
+
+ wrote this as a standalone library so you can integrate it with any tools that read BAM files, such as rust-htslib.
 Suggestions and comments are welcome!

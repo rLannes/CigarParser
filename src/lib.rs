@@ -2,11 +2,44 @@
 
 
 pub mod cigar{
+    
+    //! # CIGAR String Parsing and Manipulation
+    //! 
+    //! This module provides functionality for working with CIGAR strings,
+    //! which are used in bioinformatics to represent sequence alignments.
+    //! 
+    //! A CIGAR string consists of a series of length + operation pairs that describe
+    //! how a sequence aligns to a reference. For example, "35M110N45M" means:
+    //! - 35 bases match the reference
+    //! - 110 bases are skipped in the reference (e.g., an intron)
+    //! - 45 more bases match the reference
+    //! 
+    //! This module provides structures and methods for:
+    //! - Parsing CIGAR strings
+    //! - Analyzing alignment properties
+    //! - Detecting splicing junctions
+    //! - Working with soft/hard clipped sequences
+    //!
+    //! ## Example
+    //! 
+    //! ```rust
+    //! use your_crate::cigar::Cigar;
+    //! 
+    //! let cigar = Cigar::from("35M110N45M");
+    //! 
+    //! // Check if the alignment spans an intron
+    //! assert_eq!(cigar.has_skipped(), true);
+    //! 
+    //! // Get the positions of splicing junctions (given alignment start at position 100)
+    //! let junctions = cigar.get_junction_position(&100);
+    //! assert_eq!(junctions, Some(vec![135, 245]));
+    //! ```
+
+
     #![allow(dead_code)]
     use strand_specifier_lib::{Strand};
     use std::str::FromStr;
     use std::fmt;
-
     #[derive(Debug, PartialEq)]
     /// Basic Cigar Operation, does not accept "X" or "=".
     pub enum CigarOperation{
@@ -67,7 +100,7 @@ pub mod cigar{
     /// assert_ne!(cig.has_skipped(), true);
     /// 
     /// let cig = Cigar::from("35M110N45M3I45M10N");
-    /// assert_eq!(cig.get_skipped_pos_on_ref(&500), Some([535, 645, 738, 748]));
+    /// assert_eq!(cig.get_junction_position(&500), Some([535, 645, 738, 748]));
     pub struct Cigar{
         cigar: Vec<CigarOperation>,
     }
