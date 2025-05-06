@@ -36,7 +36,7 @@ To Compute the coverage one can parse each read instead of using the pileup meth
 ```rust
 let cig = Cigar::from("5M15N5M");
 let results = cig.get_reference_cover(&500); // 500 is the starting position of the alignment
-assert_eq!(results, Some(vec![500, 501, 502, 503, 504, 519, 520, 521, 522, 523]));
+assert_eq!(results, Some(vec![500, 501, 502, 503, 504, 520, 521, 522, 523, 524]));
 ```
 
 To check if the read overlap fully an interval: 
