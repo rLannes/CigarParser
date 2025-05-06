@@ -46,7 +46,7 @@ let results = cig.does_it_match_an_intervall(&500, 501, 503);// 500 is the start
 assert_eq!(results, true);
 ```
 
-To check if the read end of the alignment : 
+To get the end of the alignment : 
 ```rust
 let cig = Cigar::from("5M15N5M");
 let results = cig.get_end_of_aln(&500);// 500 is the starting position of the alignment
