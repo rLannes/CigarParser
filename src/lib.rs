@@ -301,8 +301,8 @@ pub mod cigar{
             }
 
             false
-            }
         }
+        
 
         /// this function return true if the reads fully match region defined by st(art) and end.
         /// inclusive of both end
