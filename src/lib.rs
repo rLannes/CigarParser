@@ -279,22 +279,29 @@ pub mod cigar{
             soft_n
         }
 
+        /// This function does not work with unstranded RNA as it is impossible to determine the orientation.
+        /// Return false for any unstranded reads
         pub fn soft_clipped_end(&self, strand: &Strand, delta: i64) -> bool{
-            if *strand == Strand::Minus{
-                match self.cigar[0]{
-                    CigarOperation::Soft (n) => {if n > delta{return true;}},
-                    _ => {return false;}
+            match *strand {
+                Strand::Minus => {
+                    match self.cigar[0]{
+                        CigarOperation::Soft (n) => {if n > delta{return true;}},
+                        _ => {return false;}
+                    };
+                },
+                Strand::Plus => {
+                    match self.cigar.last(){
+                        Some(CigarOperation::Soft(n)) => {{if *n > delta{return true;}}},
+                        _ => {return false;}
+                    }
+                },
+                Strand::NA => {
+                    return false
                 }
-
             }
-            if *strand == Strand::Plus{
-                match self.cigar.last(){
-                    Some(CigarOperation::Soft(n)) => {{if *n > delta{return true;}}},
-                    _ => {return false;}
-                }
 
-            }
             false
+            }
         }
 
         /// this function return true if the reads fully match region defined by st(art) and end.
