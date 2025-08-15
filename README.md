@@ -28,7 +28,7 @@ let cig = Cigar::from("35M110N45M3I45M10N11M");
 To get the junction positions, if any, use:.
 ```rust
 let cig = Cigar::from("35M110N45M3I45M10N");
-let results = cig.get_junction_position(&500);// 500 is the starting position of the alignment
+let results = cig.get_skipped_pos_on_ref(&500);// 500 is the starting position of the alignment
 assert_eq!(results, Some(vec![535, 645, 738, 748]));
 ```
 
