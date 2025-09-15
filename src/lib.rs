@@ -14,7 +14,6 @@ pub mod cigar{
     //! - 110 bases are skipped in the reference (e.g., an intron)
     //! - 45 more bases match the reference
     //! 
-    //! This module provides structures and methods for:
     //! - Parsing CIGAR strings
     //! - Analyzing alignment properties
     //! - Detecting splicing junctions
@@ -23,7 +22,7 @@ pub mod cigar{
     //! ## Example
     //! 
     //! ```rust
-    //! use your_crate::cigar::Cigar;
+    //! use CigarParser::cigar::Cigar;
     //! 
     //! let cigar = Cigar::from("35M110N45M");
     //! 
@@ -31,7 +30,7 @@ pub mod cigar{
     //! assert_eq!(cigar.has_skipped(), true);
     //! 
     //! // Get the positions of splicing junctions (given alignment start at position 100)
-    //! let junctions = cigar.get_junction_position(&100);
+    //! let junctions = cigar.get_junction_position(100);
     //! assert_eq!(junctions, Some(vec![135, 245]));
     //! ```
 
@@ -186,7 +185,7 @@ pub mod cigar{
 
     impl Cigar{
         
-        fn has_skipped(&self) -> bool{
+        pub fn has_skipped(&self) -> bool{
             self.cigar.iter()
             .any(|e| match e{
                 CigarOperation::Nskipped(_) => true,
