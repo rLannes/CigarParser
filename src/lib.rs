@@ -54,7 +54,21 @@ pub mod cigar{
     }
 
     impl CigarOperation{
-        /// utility function return if the operation consume the reference
+        /// Returns whether this CIGAR operation consumes positions in the reference sequence.
+        ///
+        /// Operations that consume reference: M (match), D (deletion), N (skipped)
+        /// Operations that don't: I (insertion), S (soft clip), H (hard clip), P (padding)
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::{CigarOperation};
+        /// 
+        /// let match_op = CigarOperation::Match(50);
+        /// assert_eq!(match_op.consume_ref(), true);
+        /// 
+        /// let insertion = CigarOperation::Insertion(10);
+        /// assert_eq!(insertion.consume_ref(), false);
+        /// ```
         pub fn consume_ref(&self) -> bool{
             match self{
                 CigarOperation::Nskipped(_) => true,
@@ -68,8 +82,24 @@ pub mod cigar{
             }
         }
         
+        /// Returns whether this CIGAR operation consumes positions in the query sequence.
+        ///
+        /// Operations that consume query: M (match), I (insertion), S (soft clip)
+        /// Operations that don't: D (deletion), N (skipped), H (hard clip), P (padding)
+        ///
+        /// # Examples
+        /// ``
+        /// use CigarParser::cigar::{CigarOperation};
+        /// 
+        /// let match_op = CigarOperation::Match(50);
+        /// assert_eq!(match_op.consume_que(), true);
+        /// 
+        /// let deletion = CigarOperation::Deletion(5);
+        /// assert_eq!(deletion.consume_que(), false);
+        /// ```
         pub fn consume_que(&self) -> bool{
-            /// utility function return if the operation consume the Query
+
+
             match self{
                 CigarOperation::Nskipped(_)  => false,
                 CigarOperation::Match(_)  => true,
@@ -184,7 +214,24 @@ pub mod cigar{
 
 
     impl Cigar{
-        
+        /// Checks if the CIGAR string contains any skipped regions (N operations).
+        ///
+        /// Skipped regions typically represent introns in RNA-seq alignments where
+        /// the read spans across splice junctions.
+        ///
+        /// # Returns
+        /// `true` if at least one N operation is present, `false` otherwise.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let spliced = Cigar::from("35M110N45M");
+        /// assert_eq!(spliced.has_skipped(), true);
+        /// 
+        /// let continuous = Cigar::from("80M");
+        /// assert_eq!(continuous.has_skipped(), false);
+        /// ```        
         pub fn has_skipped(&self) -> bool{
             self.cigar.iter()
             .any(|e| match e{
@@ -194,13 +241,31 @@ pub mod cigar{
         }
 
         
-        /// given a Cigar string and the start of the alignment of a read
-        /// return all the skipped position junction.
-        /// usefull to identify putative splicing junction.
-        /// Will not allocate any memory if the Cigar does not contain at least one Skipped operation (N)
-        /// This function does not check fo integer overflow, but with i64 there a no genome that come close to this size.
-        /// larger genome are in the range of 10**9 and split in chr in the range up to 10**8
-        /// i64 is in the range of 10**15.
+        /// Returns the positions of all junction boundaries in the reference sequence.
+        ///
+        /// For each N (skipped) operation, this returns a pair of coordinates:
+        /// the end position of the preceding aligned region and the start position of the following aligned region.
+        /// This is useful for identifying gaps or junctions in the alignment.
+        ///
+        /// # Arguments
+        /// * `pos` - The starting position of the alignment on the reference sequence
+        ///
+        /// # Returns
+        /// `Some(Vec<i64>)` containing junction coordinates in pairs [region_end, region_start],
+        /// or `None` if no N operations are present.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let cigar = Cigar::from("35M110N45M");
+        /// let junctions = cigar.get_junction_position(100);
+        /// assert_eq!(junctions, Some(vec![135, 245])); // first region ends at 135, second starts at 245
+        /// 
+        /// let cigar = Cigar::from("35M110N45M10N30M");
+        /// let junctions = cigar.get_junction_position(100);
+        /// assert_eq!(junctions, Some(vec![135, 245, 290, 300])); // two junctions
+        /// ```
         pub fn get_skipped_pos_on_ref(&self, pos: &i64) -> Option<Vec<i64>>{
             // test skipped so we avoid allocation if we don't need it
             if self.has_skipped(){
@@ -208,7 +273,7 @@ pub mod cigar{
                 let mut results = Vec::new();
 
                 for cigar_op in self.cigar.iter(){
-                    /// By definition it is impossible to have to consecutive same (N) operation.
+                    // By definition it is impossible to have to consecutive same (N) operation.
                     match cigar_op{
                         CigarOperation::Nskipped(n) => {
                             results.push(ref_pos);
@@ -231,6 +296,26 @@ pub mod cigar{
             }
         }
 
+            
+        /// Returns the positions of all skipped regions on the reference sequence.
+        ///
+        /// This is an alias for `get_junction_position` that uses a reference parameter.
+        /// Each N operation produces two coordinates: start and end of the skipped region.
+        ///
+        /// # Arguments
+        /// * `pos` - Reference to the starting position of the alignment
+        ///
+        /// # Returns
+        /// `Some(Vec<i64>)` with skipped region boundaries, or `None` if no N operations exist.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let cigar = Cigar::from("35M110N45M");
+        /// let skipped = cigar.get_skipped_pos_on_ref(&100);
+        /// assert_eq!(skipped, Some(vec![135, 245]));
+        /// ```
         pub fn get_junction_position(&self, pos: i64) -> Option<Vec<i64>>{
             // test skipped so we avoid allocation if we don't need it
             if self.has_skipped(){
@@ -260,7 +345,28 @@ pub mod cigar{
                 None
             }
         }
-
+        /// Returns the number of soft-clipped bases at the appropriate end based on strand.
+        ///
+        /// For plus strand reads, checks the 3' end (last operation).
+        /// For minus strand reads, checks the 5' end (first operation).
+        /// This is important for strand-specific analysis of read trimming.
+        ///
+        /// # Arguments
+        /// * `strand` - The strand orientation of the read
+        ///
+        /// # Returns
+        /// `Some(i64)` with the number of soft-clipped bases, or `None` if no soft clipping
+        /// at the relevant end.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// use strand_specifier_lib::Strand;
+        /// 
+        /// let cigar = Cigar::from("10S70M20S");
+        /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Plus), Some(20));   // 3' end
+        /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Minus), Some(10));  // 5' end
+        /// ```
         pub fn get_soft_clipped_n(&self, strand: &Strand) -> Option<i64>{
             let mut soft_n = None;
             if *strand == Strand::Minus{
@@ -280,8 +386,28 @@ pub mod cigar{
             soft_n
         }
 
-        /// This function does not work with unstranded RNA as it is impossible to determine the orientation.
-        /// Return false for any unstranded reads
+        /// Checks if the read has significant soft clipping at the strand-appropriate end.
+        ///
+        /// This function is strand-aware: for plus strand reads it checks the 3' end,
+        /// for minus strand reads it checks the 5' end. Returns `false` for unstranded reads.
+        ///
+        /// # Arguments
+        /// * `strand` - The strand orientation of the read
+        /// * `delta` - Minimum number of soft-clipped bases to consider significant
+        ///
+        /// # Returns
+        /// `true` if soft clipping exceeds the delta threshold, `false` otherwise.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// use strand_specifier_lib::Strand;
+        /// 
+        /// let cigar = Cigar::from("5S70M25S");
+        /// assert_eq!(cigar.soft_clipped_end(&Strand::Plus, 10), true);   // 25 > 10
+        /// assert_eq!(cigar.soft_clipped_end(&Strand::Minus, 10), false); // 5 < 10
+        /// assert_eq!(cigar.soft_clipped_end(&Strand::NA, 10), false);    // unstranded
+        /// ```
         pub fn soft_clipped_end(&self, strand: &Strand, delta: i64) -> bool{
             match *strand {
                 Strand::Minus => {
@@ -292,7 +418,7 @@ pub mod cigar{
                 },
                 Strand::Plus => {
                     match self.cigar.last(){
-                        Some(CigarOperation::Soft(n)) => {{if *n > delta{return true;}}},
+                        Some(CigarOperation::Soft(n)) => {if *n > delta{return true;}},
                         _ => {return false;}
                     }
                 },
@@ -305,10 +431,28 @@ pub mod cigar{
         }
         
 
-        /// this function return true if the reads fully match region defined by st(art) and end.
-        /// inclusive of both end
-        /// st >= interval, en <= intervall // TODO make end exclusive
-        /// st <= end,  st == end should work as expected. 
+        /// Checks if a genomic interval is completely covered by a single match operation.
+        ///
+        /// This function determines whether the specified interval [st, end] (inclusive)
+        /// falls entirely within one of the Match (M) operations of the alignment.
+        /// Useful for validating that a region of interest has continuous coverage.
+        ///
+        /// # Arguments
+        /// * `pos` - Reference to the starting position of the alignment
+        /// * `st` - Start coordinate of the interval to check (inclusive)
+        /// * `end` - End coordinate of the interval to check (inclusive)
+        ///
+        /// # Returns
+        /// `true` if the interval is completely covered by a single match operation.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let cigar = Cigar::from("100M");
+        /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
+        /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), false); // extends beyond
+        /// ```
         pub fn does_it_match_an_intervall(&self, pos: &i64, st:i64, end:i64) -> bool{
             let mut ref_pos = *pos;
             let mut flag: bool = false;
@@ -326,7 +470,25 @@ pub mod cigar{
             }
             flag
         } 
-        
+        /// Calculates the end position of the alignment on the reference sequence.
+        ///
+        /// This sums all operations that consume reference sequence positions
+        /// (M, D, N operations) to determine where the alignment ends.
+        ///
+        /// # Arguments
+        /// * `pos` - Reference to the starting position of the alignment
+        ///
+        /// # Returns
+        /// The final reference coordinate covered by this alignment.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let cigar = Cigar::from("50M100N75M");
+        /// let end = cigar.get_end_of_aln(&1000);
+        /// assert_eq!(end, 1225); // 1000 + 50 + 100 + 75
+        /// ```
         pub fn get_end_of_aln(&self, pos: &i64) -> i64{
             let mut ref_pos = *pos;
             for cigar_op in self.cigar.iter(){
@@ -338,6 +500,27 @@ pub mod cigar{
             ref_pos
         } 
 
+
+        /// Returns all reference coordinate ranges covered by match operations.
+        ///
+        /// This function identifies all genomic intervals that are covered by
+        /// match (M) operations, skipping over deletions, insertions, and skipped regions.
+        /// Returns pairs of coordinates [start, end] for each contiguous matched region.
+        ///
+        /// # Arguments
+        /// * `st` - Starting position of the alignment on the reference
+        ///
+        /// # Returns
+        /// `Vec<i64>` containing alternating start and end coordinates of covered regions.
+        ///
+        /// # Examples
+        /// ```
+        /// use CigarParser::cigar::Cigar;
+        /// 
+        /// let cigar = Cigar::from("50M100N75M");
+        /// let coverage = cigar.get_reference_cover(1000);
+        /// assert_eq!(coverage, vec![1000, 1050, 1150, 1225]); // two covered regions
+        /// ```
         pub fn get_reference_cover(&self, st:i64)-> Vec<i64>{
             let mut ref_pos = st;
             let mut result : Vec<i64> = Vec::new();
