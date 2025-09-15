@@ -193,6 +193,8 @@ pub mod cigar{
                 _ => false
             })
         }
+
+        
         /// given a Cigar string and the start of the alignment of a read
         /// return all the skipped position junction.
         /// usefull to identify putative splicing junction.
@@ -230,7 +232,7 @@ pub mod cigar{
             }
         }
 
-        fn get_junction_position(&self, pos: i64) -> Option<Vec<i64>>{
+        pub fn get_junction_position(&self, pos: i64) -> Option<Vec<i64>>{
             // test skipped so we avoid allocation if we don't need it
             if self.has_skipped(){
                 let mut ref_pos = pos; // copy
@@ -396,6 +398,7 @@ pub mod cigar{
         #[should_panic]
         fn test_from_panic() {
             let cig = Cigar::from("35M110N45M3I45M10N50K");
+
         }
         #[test]
         fn test_from_str(){
@@ -431,7 +434,7 @@ pub mod cigar{
         #[test]
         fn test_match_outofbound(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 550, 580);
+            let results = cig.does_it_match_an_intervall(&500, 550, 585);
             assert_eq!(results, false)
             //assert_eq!(results, None)
         } 
@@ -460,7 +463,19 @@ pub mod cigar{
         fn softR(){
             let cig = Cigar::from("2S80M53373N169M45S");
             let results = cig.soft_clipped_end(&Strand::Minus, 10);
-            assert_eq!(results, true)
+            assert_eq!(results, false);
+            let results = cig.soft_clipped_end(&Strand::Plus, 10);
+            assert_eq!(results, true);
+            //assert_eq!(results, None)
+        }   
+
+        #[test]  
+        fn map_region(){
+            let cig = Cigar::from("11M214030N240M");
+            let res = cig.get_reference_cover(20672897);
+            println!("{:?}", res);
+            
+            //assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
     }
