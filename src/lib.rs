@@ -240,6 +240,18 @@ pub mod cigar{
             })
         }
 
+        pub fn get_read_length_from_cigar(&self) -> i64 {
+            let mut res: i64 = 0;
+            for cigar_op in self.cigar.iter(){
+                    match cigar_op{
+                        CigarOperation::Match(n) |  CigarOperation::Insertion(n) | CigarOperation::Soft(n)  => {
+                            res += n ;
+                        }
+                        _  => ()
+                    }
+                }
+            res
+        }
         
         /// Returns the positions of all junction boundaries in the reference sequence.
         ///
