@@ -1,5 +1,6 @@
 
 
+use std::fmt;
 
 pub mod cigar{
     
@@ -37,6 +38,7 @@ pub mod cigar{
 
     #![allow(dead_code)]
     use strand_specifier_lib::{Strand};
+    use std::path::Display;
     use std::str::FromStr;
     use std::fmt;
     #[derive(Debug, PartialEq)]
@@ -175,6 +177,13 @@ pub mod cigar{
             )
         }
         
+    }
+    
+    impl fmt::Display for ParseCigarError{
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+            write!(f, "fail to parse Cigar {}", self) 
+        }
+
     }
 
     //#[deprecated(note = "use `Cigar::from_str` which returns a Result instead")]
