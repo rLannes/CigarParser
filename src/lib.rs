@@ -602,39 +602,39 @@ pub mod cigar{
         #[test]
         fn test_pos(){
             let cig = Cigar::from("35M110N45M3I45M10N");
-            let results = cig.get_skipped_pos_on_ref(&500);
+            let results = cig.get_skipped_pos_on_ref(500);
             assert_eq!(results, Some(vec![535, 645, 735, 745]))
         }
         #[test]
         fn test_pos_none(){
             let cig = Cigar::from("35M45M3I45M");
-            let results = cig.get_skipped_pos_on_ref(&500);
+            let results = cig.get_skipped_pos_on_ref(500);
             assert_eq!(results, None)
         }   
         #[test]
         fn test_pos_2(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.get_skipped_pos_on_ref(&16946);
+            let results = cig.get_skipped_pos_on_ref(16946);
             //assert_eq!(results, None)
         }   
         #[test]
         fn test_match_1(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 550, 560);
+            let results = cig.does_it_match_an_intervall(500, 550, 560);
             //println!("{:?}", results);
             assert_eq!(results, true)
         }   
         #[test]
         fn test_match_outofbound(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 550, 585);
+            let results = cig.does_it_match_an_intervall(500, 550, 585);
             assert_eq!(results, false)
             //assert_eq!(results, None)
         } 
         #[test]  
         fn test_match_s_eq_e(){
             let cig = Cigar::from("2S80M53373N169M");
-            let results = cig.does_it_match_an_intervall(&500, 550, 550);
+            let results = cig.does_it_match_an_intervall(500, 550, 550);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
@@ -648,7 +648,7 @@ pub mod cigar{
         #[test]  
         fn test_match_justinbound(){
             let cig = Cigar::from("2S80M53373N169M45S");
-            let results = cig.does_it_match_an_intervall(&500, 575, 579);
+            let results = cig.does_it_match_an_intervall(500, 575, 579);
             assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
