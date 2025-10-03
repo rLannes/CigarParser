@@ -225,10 +225,10 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let spliced = Cigar::from("35M110N45M");
+        /// let spliced = Cigar::from_str("35M110N45M").unwrap();
         /// assert_eq!(spliced.has_skipped(), true);
         /// 
-        /// let continuous = Cigar::from("80M");
+        /// let continuous = Cigar::from_str("80M").unwrap();
         /// assert_eq!(continuous.has_skipped(), false);
         /// ```        
         pub fn has_skipped(&self) -> bool{
@@ -269,12 +269,12 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from("35M110N45M");
+        /// let cigar = Cigar::from_str("35M110N45M").unwrap();
         /// let junctions = cigar.get_junction_position(100);
         /// assert_eq!(junctions, Some(vec![135, 245])); // first region ends at 135, second starts at 245
         /// 
-        /// let cigar = Cigar::from("35M110N45M10N30M");
-        /// let junctions = cigar.get_junction_position(100);
+        /// let cigar = Cigar::from_str("35M110N45M10N30M");
+        /// let junctions = cigar.get_junction_position(100).unwrap();
         /// assert_eq!(junctions, Some(vec![135, 245, 290, 300])); // two junctions
         /// ```
         pub fn get_skipped_pos_on_ref(&self, pos: &i64) -> Option<Vec<i64>>{
@@ -323,7 +323,7 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from("35M110N45M");
+        /// let cigar = Cigar::from_str("35M110N45M").unwrap();
         /// let skipped = cigar.get_skipped_pos_on_ref(&100);
         /// assert_eq!(skipped, Some(vec![135, 245]));
         /// ```
@@ -374,7 +374,7 @@ pub mod cigar{
         /// use CigarParser::cigar::Cigar;
         /// use strand_specifier_lib::Strand;
         /// 
-        /// let cigar = Cigar::from("10S70M20S");
+        /// let cigar = Cigar::from_str("10S70M20S").unwrap();
         /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Plus), Some(20));   // 3' end
         /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Minus), Some(10));  // 5' end
         /// ```
@@ -414,7 +414,7 @@ pub mod cigar{
         /// use CigarParser::cigar::Cigar;
         /// use strand_specifier_lib::Strand;
         /// 
-        /// let cigar = Cigar::from("5S70M25S");
+        /// let cigar = Cigar::from_str("5S70M25S").unwrap();
         /// assert_eq!(cigar.soft_clipped_end(&Strand::Plus, 10), true);   // 25 > 10
         /// assert_eq!(cigar.soft_clipped_end(&Strand::Minus, 10), false); // 5 < 10
         /// assert_eq!(cigar.soft_clipped_end(&Strand::NA, 10), false);    // unstranded
@@ -460,7 +460,7 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from("100M");
+        /// let cigar = Cigar::from_str("100M").unwrap();
         /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
         /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), false); // extends beyond
         /// ```
@@ -496,7 +496,7 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from("50M100N75M");
+        /// let cigar = Cigar::from_str("50M100N75M").unwrap();
         /// let end = cigar.get_end_of_aln(&1000);
         /// assert_eq!(end, 1225); // 1000 + 50 + 100 + 75
         /// ```
@@ -528,7 +528,7 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from("50M100N75M");
+        /// let cigar = Cigar::from_str("50M100N75M").unwrap();
         /// let coverage = cigar.get_reference_cover(1000);
         /// assert_eq!(coverage, vec![1000, 1050, 1150, 1225]); // two covered regions
         /// ```
@@ -583,7 +583,7 @@ pub mod cigar{
         use super::*;
         #[test]
         fn test_from() {
-            let cig = Cigar::from("35M110N45M3I45M10N");
+            let cig = Cigar::from_str("35M110N45M3I45M10N").unwrap();
             assert_eq!(cig, Cigar{ cigar: vec![CigarOperation::Match(35), CigarOperation::Nskipped(110), CigarOperation::Match(45), CigarOperation::Insertion(3),
             CigarOperation::Match(45), CigarOperation::Nskipped(10)]});
         }
