@@ -277,10 +277,10 @@ pub mod cigar{
         /// let junctions = cigar.get_junction_position(100).unwrap();
         /// assert_eq!(junctions, Some(vec![135, 245, 290, 300])); // two junctions
         /// ```
-        pub fn get_skipped_pos_on_ref(&self, pos: &i64) -> Option<Vec<i64>>{
+        pub fn get_skipped_pos_on_ref(&self, pos: i64) -> Option<Vec<i64>>{
             // test skipped so we avoid allocation if we don't need it
             if self.has_skipped(){
-                let mut ref_pos = *pos; // copy
+                let mut ref_pos = pos; // copy
                 let mut results = Vec::new();
 
                 for cigar_op in self.cigar.iter(){
@@ -464,8 +464,8 @@ pub mod cigar{
         /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
         /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), false); // extends beyond
         /// ```
-        pub fn does_it_match_an_intervall(&self, pos: &i64, st:i64, end:i64) -> bool{
-            let mut ref_pos = *pos;
+        pub fn does_it_match_an_intervall(&self, pos: i64, st:i64, end:i64) -> bool{
+            let mut ref_pos = pos;
             let mut flag: bool = false;
             for cigar_op in self.cigar.iter(){
                 match cigar_op{
@@ -500,8 +500,8 @@ pub mod cigar{
         /// let end = cigar.get_end_of_aln(&1000);
         /// assert_eq!(end, 1225); // 1000 + 50 + 100 + 75
         /// ```
-        pub fn get_end_of_aln(&self, pos: &i64) -> i64{
-            let mut ref_pos = *pos;
+        pub fn get_end_of_aln(&self, pos: i64) -> i64{
+            let mut ref_pos = pos;
             for cigar_op in self.cigar.iter(){
                 match cigar_op{
                     CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) | CigarOperation::Match(n)=> {ref_pos += n;},
