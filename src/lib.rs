@@ -4,6 +4,7 @@ use std::fmt;
 
 pub mod cigar{
     
+
     //! # CIGAR String Parsing and Manipulation
     //! 
     //! This module provides functionality for working with CIGAR strings,
@@ -115,6 +116,14 @@ pub mod cigar{
         }
     }
 
+
+    #[derive(Debug, thiserror::Error)]
+    pub enum CigarError{
+        #[error("Error While parsing Cigar String")]
+        ParseCigarError,
+    }
+    
+
     #[derive(Debug, PartialEq)]
     /// Representation of Cigar Operation 
     /// This is the main structure users interact with.
@@ -179,11 +188,7 @@ pub mod cigar{
     }
     
     
-    #[derive(Debug, thiserror::Error)]
-    pub enum CigarError{
-        #[error("Error While parsing Cigar String")]
-        ParseCigarError,
-    }
+
 
 
     
