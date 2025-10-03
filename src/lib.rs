@@ -116,19 +116,18 @@ pub mod cigar{
     #[derive(Debug, PartialEq)]
     /// Representation of Cigar Operation 
     /// This is the main structure users interact with.
-    /// Right now it does only allow to interact with from(&str) and get_skipped_pos_on_ref().
     ///
     /// Note: This does not check the logic of operation, for example a cigar string starting or ending by N should not be possible,
     /// at the moment this code does not check for it.
     ///
     /// Warning: from(&str) can panic! use from_str(&str) for a Result<> 
     /// 
-    /// let cig = Cigar::from("35M110N45M3I45M10N");
+    /// let cig = Cigar::from_str("35M110N45M3I45M10N");
     /// assert_eq!(cig.has_skipped(), true);
-    /// let cig = Cigar::from("35M45M3I45M");
+    /// let cig = Cigar::from_str("35M45M3I45M");
     /// assert_ne!(cig.has_skipped(), true);
     /// 
-    /// let cig = Cigar::from("35M110N45M3I45M10N");
+    /// let cig = Cigar::from_str("35M110N45M3I45M10N");
     /// assert_eq!(cig.get_junction_position(&500), Some([535, 645, 738, 748]));
     pub struct Cigar{
         cigar: Vec<CigarOperation>,
@@ -178,7 +177,7 @@ pub mod cigar{
         
     }
 
-
+    //#[deprecated(note = "use `Cigar::from_str` which returns a Result instead")]
     /// Create a new Cigar struct from a &str. the &str must be a valid cigar string without "X" or "=" operation
     /// Will Panic if the cigar string is not valid.
     impl From<&str> for Cigar {

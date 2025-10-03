@@ -23,6 +23,7 @@ You have two options to create a Cigar object:
 let cig = Cigar::from_str("35M110N45M3I45M10N11M");
 
 // This will panic if the CIGAR string is not properly formatted
+// This will be deprecated in the future please use from_str
 let cig = Cigar::from("35M110N45M3I45M10N11M");
 ```
 To get the junction positions, if any, use:.
