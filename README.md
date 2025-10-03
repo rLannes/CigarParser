@@ -28,28 +28,28 @@ let cig = Cigar::from("35M110N45M3I45M10N11M");
 ```
 To get the junction positions, if any, use:.
 ```rust
-let cig = Cigar::from("35M110N45M3I45M10N");
+let cig = Cigar::from_str("35M110N45M3I45M10N").unwrap();
 let results = cig.get_skipped_pos_on_ref(&500);// 500 is the starting position of the alignment
 assert_eq!(results, Some(vec![535, 645, 738, 748]));
 ```
 
 To Compute the coverage one can parse each read instead of using the pileup method.
 ```rust
-let cig = Cigar::from("5M15N5M");
+let cig = Cigar::from_str("5M15N5M").unwrap();
 let results = cig.get_reference_cover(&500); // 500 is the starting position of the alignment
 assert_eq!(results, Some(vec![500, 501, 502, 503, 504, 520, 521, 522, 523, 524]));
 ```
 
 To check if the read overlap fully an interval: 
 ```rust
-let cig = Cigar::from("5M15N5M");
+let cig = Cigar::from_str("5M15N5M").unwrap();
 let results = cig.does_it_match_an_intervall(&500, 501, 503);// 500 is the starting position of the alignment
 assert_eq!(results, true);
 ```
 
 To get the end of the alignment : 
 ```rust
-let cig = Cigar::from("5M15N5M");
+let cig = Cigar::from_str("5M15N5M").unwrap();
 let results = cig.get_end_of_aln(&500);// 500 is the starting position of the alignment
 assert_eq!(results, 519);
 ```

@@ -24,7 +24,7 @@ pub mod cigar{
     //! ```rust
     //! use CigarParser::cigar::Cigar;
     //! 
-    //! let cigar = Cigar::from("35M110N45M");
+    //! let cigar = Cigar::from_str("35M110N45M").unwrap();
     //! 
     //! // Check if the alignment spans an intron
     //! assert_eq!(cigar.has_skipped(), true);
