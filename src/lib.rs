@@ -135,14 +135,13 @@ pub mod cigar{
         cigar: Vec<CigarOperation>,
     }
 
-    #[derive(Debug, PartialEq, Eq)]
-    pub struct ParseCigarError;
+
     /// Create a new Cigar struct from a &str. the &str must be a valid cigar string without "X" or "=" operation
     /// Will return an error if the cigar string is not valid.
     impl FromStr for Cigar {
 
-        type Err = ParseCigarError;
-        fn from_str(str: &str) -> Result<Self, ParseCigarError> {
+        type Err = CigarError;
+        fn from_str(str: &str) -> Result<Self, CigarError> {
             let mut operations = Vec::new();
             let mut length = 0 as i64;
 
@@ -162,7 +161,7 @@ pub mod cigar{
                         _ => CigarOperation::Invalid,
                     };
                     if op == CigarOperation::Invalid{
-                        return Err(ParseCigarError);
+                        return Err(CigarError::ParseCigarError);
                     }
                     if op == CigarOperation::Unaligned{
                         return Ok(Cigar{cigar:Vec::new()});
@@ -179,12 +178,15 @@ pub mod cigar{
         
     }
     
-    impl fmt::Display for ParseCigarError{
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
-            write!(f, "fail to parse Cigar {}", self) 
-        }
-
+    
+    #[derive(Debug, thiserror::Error)]
+    pub enum CigarError{
+        #[error("Error While parsing Cigar String")]
+        ParseCigarError,
     }
+
+
+    
 
     //#[deprecated(note = "use `Cigar::from_str` which returns a Result instead")]
     /// Create a new Cigar struct from a &str. the &str must be a valid cigar string without "X" or "=" operation

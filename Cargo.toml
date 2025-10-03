@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 strand_specifier = { git = "https://github.com/rLannes/BAMstrandSpecifier" }
+thiserror = "2"
