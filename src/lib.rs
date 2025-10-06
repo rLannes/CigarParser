@@ -39,6 +39,7 @@ pub mod cigar{
 
     #![allow(dead_code)]
     use strand_specifier_lib::{Strand};
+    use std::cell::RefCell;
     use std::path::Display;
     use std::str::FromStr;
     use std::fmt;
@@ -488,15 +489,59 @@ pub mod cigar{
                     CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {ref_pos += n;},
                     CigarOperation::Match(n) => {
                         if (st >= ref_pos) & (end <= ref_pos + n) {
-                           flag = true;
+                            return true ;
+                           //s = true;
                         }
                         ref_pos += n;
                     },
-                    _ => (), // does not consme the reference
+                    _ => (),
                 }
             }
             flag
         } 
+    /// Checks if a genomic interval is covered by a single match operation.
+    ///
+    /// This function determines whether the specified interval [st, end] (inclusive)
+    /// falls within one of the Match (M) operations of the alignment.
+    /// Useful for validating that a region of interest has coverage.
+    ///
+    /// # Arguments
+    /// * `pos` - Reference to the starting position of the alignment
+    /// * `st` - Start coordinate of the interval to check (inclusive)
+    /// * `end` - End coordinate of the interval to check (inclusive)
+    ///
+    /// # Returns
+    /// `true` if the interval is completely covered by a single match operation.
+    ///
+    /// # Examples
+    /// ```
+    /// use CigarParser::cigar::Cigar;
+    /// 
+    /// let cigar = Cigar::from_str("100M").unwrap();
+    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
+    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), true); // extends beyond
+    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 620, 720), false); // extends beyond
+    /// ```
+    pub fn does_it_overlap_an_intervall(&self, pos: i64, st:i64, end:i64) -> bool{
+            let mut ref_pos = pos;
+            let mut flag: bool = false;
+            for cigar_op in self.cigar.iter(){
+                match cigar_op{
+                    CigarOperation::Nskipped(n) | CigarOperation::Deletion(n) => {ref_pos += n;},
+                    CigarOperation::Match(n) => {
+                        if (st < ref_pos + n) & (end > ref_pos){
+                          //flag = true;
+                           return true
+                        }
+                        ref_pos += n;
+                    },
+                    _ => (),
+                }
+            }
+            flag
+        } 
+
+
         /// Calculates the end position of the alignment on the reference sequence.
         ///
         /// This sums all operations that consume reference sequence positions
