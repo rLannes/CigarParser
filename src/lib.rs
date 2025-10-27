@@ -1,5 +1,5 @@
 
-
+use std::str::FromStr;
 use std::fmt;
 
 pub mod cigar{
@@ -26,7 +26,7 @@ pub mod cigar{
     //! ```rust
     //! use CigarParser::cigar::Cigar;
     //! 
-    //! let cigar = Cigar::from_str("35M110N45M").unwrap();
+    //! let cigar = Cigar::from("35M110N45M");
     //! 
     //! // Check if the alignment spans an intron
     //! assert_eq!(cigar.has_skipped(), true);
@@ -242,10 +242,10 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let spliced = Cigar::from_str("35M110N45M").unwrap();
+        /// let spliced = Cigar::from("35M110N45M");
         /// assert_eq!(spliced.has_skipped(), true);
         /// 
-        /// let continuous = Cigar::from_str("80M").unwrap();
+        /// let continuous = Cigar::from("80M");
         /// assert_eq!(continuous.has_skipped(), false);
         /// ```        
         pub fn has_skipped(&self) -> bool{
@@ -286,12 +286,12 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from_str("35M110N45M").unwrap();
+        /// let cigar = Cigar::from("35M110N45M");
         /// let junctions = cigar.get_junction_position(100);
         /// assert_eq!(junctions, Some(vec![135, 245])); // first region ends at 135, second starts at 245
         /// 
-        /// let cigar = Cigar::from_str("35M110N45M10N30M");
-        /// let junctions = cigar.get_junction_position(100).unwrap();
+        /// let cigar = Cigar::from("35M110N45M10N30M");
+        /// let junctions = cigar.get_junction_position(100);
         /// assert_eq!(junctions, Some(vec![135, 245, 290, 300])); // two junctions
         /// ```
         pub fn get_skipped_pos_on_ref(&self, pos: i64) -> Option<Vec<i64>>{
@@ -340,8 +340,8 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from_str("35M110N45M").unwrap();
-        /// let skipped = cigar.get_skipped_pos_on_ref(&100);
+        /// let cigar = Cigar::from("35M110N45M");
+        /// let skipped = cigar.get_skipped_pos_on_ref(100);
         /// assert_eq!(skipped, Some(vec![135, 245]));
         /// ```
         pub fn get_junction_position(&self, pos: i64) -> Option<Vec<i64>>{
@@ -391,7 +391,7 @@ pub mod cigar{
         /// use CigarParser::cigar::Cigar;
         /// use strand_specifier_lib::Strand;
         /// 
-        /// let cigar = Cigar::from_str("10S70M20S").unwrap();
+        /// let cigar = Cigar::from("10S70M20S");
         /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Plus), Some(20));   // 3' end
         /// assert_eq!(cigar.get_soft_clipped_n(&Strand::Minus), Some(10));  // 5' end
         /// ```
@@ -431,7 +431,7 @@ pub mod cigar{
         /// use CigarParser::cigar::Cigar;
         /// use strand_specifier_lib::Strand;
         /// 
-        /// let cigar = Cigar::from_str("5S70M25S").unwrap();
+        /// let cigar = Cigar::from("5S70M25S");
         /// assert_eq!(cigar.soft_clipped_end(&Strand::Plus, 10), true);   // 25 > 10
         /// assert_eq!(cigar.soft_clipped_end(&Strand::Minus, 10), false); // 5 < 10
         /// assert_eq!(cigar.soft_clipped_end(&Strand::NA, 10), false);    // unstranded
@@ -477,9 +477,9 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from_str("100M").unwrap();
-        /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
-        /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), false); // extends beyond
+        /// let cigar = Cigar::from("100M");
+        /// assert_eq!(cigar.does_it_match_an_intervall(500, 520, 580), true);  // within match
+        /// assert_eq!(cigar.does_it_match_an_intervall(500, 520, 620), false); // extends beyond
         /// ```
         pub fn does_it_match_an_intervall(&self, pos: i64, st:i64, end:i64) -> bool{
             let mut ref_pos = pos;
@@ -517,10 +517,10 @@ pub mod cigar{
     /// ```
     /// use CigarParser::cigar::Cigar;
     /// 
-    /// let cigar = Cigar::from_str("100M").unwrap();
-    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 580), true);  // within match
-    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 520, 620), true); // extends beyond
-    /// assert_eq!(cigar.does_it_match_an_intervall(&500, 620, 720), false); // extends beyond
+    /// let cigar = Cigar::from("100M");
+    /// assert_eq!(cigar.does_it_match_an_intervall(500, 520, 580), true);  // within match
+    /// assert_eq!(cigar.does_it_match_an_intervall(500, 520, 620), false); // extends beyond
+    /// assert_eq!(cigar.does_it_match_an_intervall(500, 620, 720), false); // extends beyond
     /// ```
     pub fn does_it_overlap_an_intervall(&self, pos: i64, st:i64, end:i64) -> bool{
             let mut ref_pos = pos;
@@ -557,8 +557,8 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from_str("50M100N75M").unwrap();
-        /// let end = cigar.get_end_of_aln(&1000);
+        /// let cigar = Cigar::from("50M100N75M");
+        /// let end = cigar.get_end_of_aln(1000);
         /// assert_eq!(end, 1225); // 1000 + 50 + 100 + 75
         /// ```
         pub fn get_end_of_aln(&self, pos: i64) -> i64{
@@ -589,7 +589,7 @@ pub mod cigar{
         /// ```
         /// use CigarParser::cigar::Cigar;
         /// 
-        /// let cigar = Cigar::from_str("50M100N75M").unwrap();
+        /// let cigar = Cigar::from("50M100N75M");
         /// let coverage = cigar.get_reference_cover(1000);
         /// assert_eq!(coverage, vec![1000, 1050, 1150, 1225]); // two covered regions
         /// ```
@@ -640,11 +640,14 @@ pub mod cigar{
 
     #[cfg(test)]
     mod tests {
-        use crate::cigar::{Cigar, CigarOperation};
         use super::*;
+        use crate::cigar::{Cigar, CigarOperation, CigarError};
+        use strand_specifier_lib::Strand;
+        use std::str::FromStr;
+
         #[test]
         fn test_from() {
-            let cig = Cigar::from_str("35M110N45M3I45M10N").unwrap();
+            let cig = Cigar::from("35M110N45M3I45M10N");
             assert_eq!(cig, Cigar{ cigar: vec![CigarOperation::Match(35), CigarOperation::Nskipped(110), CigarOperation::Match(45), CigarOperation::Insertion(3),
             CigarOperation::Match(45), CigarOperation::Nskipped(10)]});
         }
@@ -732,6 +735,335 @@ pub mod cigar{
             //assert_eq!(results, true)
             //assert_eq!(results, None)
         }   
+
+
+         #[test]
+    fn test_cigar_operation_consume_ref() {
+        assert_eq!(CigarOperation::Match(50).consume_ref(), true);
+        assert_eq!(CigarOperation::Deletion(10).consume_ref(), true);
+        assert_eq!(CigarOperation::Nskipped(100).consume_ref(), true);
+        assert_eq!(CigarOperation::Insertion(5).consume_ref(), false);
+        assert_eq!(CigarOperation::Soft(20).consume_ref(), false);
+        assert_eq!(CigarOperation::Hard(15).consume_ref(), false);
+        assert_eq!(CigarOperation::Padded(3).consume_ref(), false);
+    }
+
+    #[test]
+    fn test_cigar_operation_consume_que() {
+        assert_eq!(CigarOperation::Match(50).consume_que(), true);
+        assert_eq!(CigarOperation::Insertion(10).consume_que(), true);
+        assert_eq!(CigarOperation::Soft(20).consume_que(), true);
+        assert_eq!(CigarOperation::Deletion(5).consume_que(), false);
+        assert_eq!(CigarOperation::Nskipped(100).consume_que(), false);
+        assert_eq!(CigarOperation::Hard(15).consume_que(), false);
+        assert_eq!(CigarOperation::Padded(3).consume_que(), false);
+    }
+
+    // ========== Cigar Parsing Tests ==========
+
+    #[test]
+    fn test_cigar_from_str_simple() {
+        let cigar = Cigar::from_str("50M").unwrap();
+        assert_eq!(cigar.cigar.len(), 1);
+        assert_eq!(cigar.cigar[0], CigarOperation::Match(50));
+    }
+
+    #[test]
+    fn test_cigar_from_str_complex() {
+        let cigar = Cigar::from_str("35M110N45M").unwrap();
+        assert_eq!(cigar.cigar.len(), 3);
+        assert_eq!(cigar.cigar[0], CigarOperation::Match(35));
+        assert_eq!(cigar.cigar[1], CigarOperation::Nskipped(110));
+        assert_eq!(cigar.cigar[2], CigarOperation::Match(45));
+    }
+
+    #[test]
+    fn test_cigar_from_str_all_operations() {
+        let cigar = Cigar::from_str("10S20M5I15D100N30M5H").unwrap();
+        assert_eq!(cigar.cigar.len(), 7);
+        assert_eq!(cigar.cigar[0], CigarOperation::Soft(10));
+        assert_eq!(cigar.cigar[1], CigarOperation::Match(20));
+        assert_eq!(cigar.cigar[2], CigarOperation::Insertion(5));
+        assert_eq!(cigar.cigar[3], CigarOperation::Deletion(15));
+        assert_eq!(cigar.cigar[4], CigarOperation::Nskipped(100));
+        assert_eq!(cigar.cigar[5], CigarOperation::Match(30));
+        assert_eq!(cigar.cigar[6], CigarOperation::Hard(5));
+    }
+
+    #[test]
+    fn test_cigar_from_str_unaligned() {
+        let cigar = Cigar::from_str("*").unwrap();
+        assert_eq!(cigar.cigar.len(), 0);
+    }
+
+    #[test]
+    fn test_cigar_from_str_invalid() {
+        let result = Cigar::from_str("50M10X20M");
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), CigarError::ParseCigarError));
+    }
+
+    #[test]
+    fn test_cigar_from_str_large_numbers() {
+        let cigar = Cigar::from("1234567M");
+        assert_eq!(cigar.cigar[0], CigarOperation::Match(1234567));
+    }
+
+    // ========== has_skipped Tests ==========
+
+    #[test]
+    fn test_has_skipped_true() {
+        let cigar = Cigar::from("35M110N45M");
+        assert_eq!(cigar.has_skipped(), true);
+    }
+
+    #[test]
+    fn test_has_skipped_false() {
+        let cigar = Cigar::from("80M");
+        assert_eq!(cigar.has_skipped(), false);
+    }
+
+    #[test]
+    fn test_has_skipped_multiple() {
+        let cigar = Cigar::from("35M110N45M10N30M");
+        assert_eq!(cigar.has_skipped(), true);
+    }
+
+    // ========== get_read_length_from_cigar Tests ==========
+
+    #[test]
+    fn test_get_read_length_simple() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.get_read_length_from_cigar(), 100);
+    }
+
+    #[test]
+    fn test_get_read_length_with_insertion() {
+        let cigar = Cigar::from("50M10I40M");
+        assert_eq!(cigar.get_read_length_from_cigar(), 100);
+    }
+
+    #[test]
+    fn test_get_read_length_with_soft_clip() {
+        let cigar = Cigar::from("10S70M20S");
+        assert_eq!(cigar.get_read_length_from_cigar(), 100);
+    }
+
+    #[test]
+    fn test_get_read_length_complex() {
+        let cigar = Cigar::from("5S50M10I30M5D20M10S");
+        // 5S + 50M + 10I + 30M + 20M + 10S = 125
+        assert_eq!(cigar.get_read_length_from_cigar(), 125);
+    }
+
+    // ========== Junction Position Tests ==========
+
+    #[test]
+    fn test_get_junction_position_single() {
+        let cigar = Cigar::from("35M110N45M");
+        let junctions = cigar.get_junction_position(100);
+        assert_eq!(junctions, Some(vec![135, 245]));
+    }
+
+    #[test]
+    fn test_get_junction_position_multiple() {
+        let cigar = Cigar::from("35M110N45M10N30M");
+        let junctions = cigar.get_junction_position(100);
+        assert_eq!(junctions, Some(vec![135, 245, 290, 300]));
+    }
+
+    #[test]
+    fn test_get_junction_position_none() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.get_junction_position(100), None);
+    }
+
+    #[test]
+    fn test_get_skipped_pos_on_ref() {
+        let cigar = Cigar::from("35M110N45M");
+        let skipped = cigar.get_skipped_pos_on_ref(500);
+        assert_eq!(skipped, Some(vec![535, 645]));
+    }
+
+    // ========== Soft Clipping Tests ==========
+
+    #[test]
+    fn test_get_soft_clipped_n_plus_strand() {
+        let cigar = Cigar::from("10S70M20S");
+        assert_eq!(cigar.get_soft_clipped_n(&Strand::Plus), Some(20));
+    }
+
+    #[test]
+    fn test_get_soft_clipped_n_minus_strand() {
+        let cigar = Cigar::from("10S70M20S");
+        assert_eq!(cigar.get_soft_clipped_n(&Strand::Minus), Some(10));
+    }
+
+    #[test]
+    fn test_get_soft_clipped_n_no_clipping() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.get_soft_clipped_n(&Strand::Plus), None);
+        assert_eq!(cigar.get_soft_clipped_n(&Strand::Minus), None);
+    }
+
+    #[test]
+    fn test_soft_clipped_end_plus_strand() {
+        let cigar = Cigar::from("5S70M25S");
+        assert_eq!(cigar.soft_clipped_end(&Strand::Plus, 10), true);
+        assert_eq!(cigar.soft_clipped_end(&Strand::Plus, 30), false);
+    }
+
+    #[test]
+    fn test_soft_clipped_end_minus_strand() {
+        let cigar = Cigar::from("5S70M25S");
+        assert_eq!(cigar.soft_clipped_end(&Strand::Minus, 4), true);
+        assert_eq!(cigar.soft_clipped_end(&Strand::Minus, 10), false);
+    }
+
+    #[test]
+    fn test_soft_clipped_end_na_strand() {
+        let cigar = Cigar::from("25S50M25S");
+        assert_eq!(cigar.soft_clipped_end(&Strand::NA, 10), false);
+    }
+
+    // ========== Interval Matching Tests ==========
+
+    #[test]
+    fn test_does_it_match_an_intervall_within() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.does_it_match_an_intervall(500, 520, 580), true);
+    }
+
+    #[test]
+    fn test_does_it_match_an_intervall_extends_beyond() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.does_it_match_an_intervall(500, 520, 620), false);
+    }
+
+    #[test]
+    fn test_does_it_match_an_intervall_before_start() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.does_it_match_an_intervall(500, 450, 520), false);
+    }
+
+    #[test]
+    fn test_does_it_match_an_intervall_with_gap() {
+        let cigar = Cigar::from("50M100N50M");
+        assert_eq!(cigar.does_it_match_an_intervall(100, 120, 140), true);
+        assert_eq!(cigar.does_it_match_an_intervall(100, 120, 180), false);
+    }
+
+    #[test]
+    fn test_does_it_overlap_an_intervall_partial() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.does_it_overlap_an_intervall(500, 520, 580), true);
+        assert_eq!(cigar.does_it_overlap_an_intervall(500, 580, 620), true);
+        assert_eq!(cigar.does_it_overlap_an_intervall(500, 450, 520), true);
+    }
+
+    #[test]
+    fn test_does_it_overlap_an_intervall_no_overlap() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.does_it_overlap_an_intervall(500, 620, 720), false);
+        assert_eq!(cigar.does_it_overlap_an_intervall(500, 400, 450), false);
+    }
+
+    // ========== End Position Tests ==========
+
+    #[test]
+    fn test_get_end_of_aln_simple() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.get_end_of_aln(1000), 1100);
+    }
+
+    #[test]
+    fn test_get_end_of_aln_with_skip() {
+        let cigar = Cigar::from("50M100N75M");
+        assert_eq!(cigar.get_end_of_aln(1000), 1225);
+    }
+
+    #[test]
+    fn test_get_end_of_aln_with_deletion() {
+        let cigar = Cigar::from("50M10D50M");
+        assert_eq!(cigar.get_end_of_aln(1000), 1110);
+    }
+
+    #[test]
+    fn test_get_end_of_aln_with_insertion() {
+        let cigar = Cigar::from("50M10I50M");
+        // Insertion doesn't consume reference
+        assert_eq!(cigar.get_end_of_aln(1000), 1100);
+    }
+
+    // ========== Reference Coverage Tests ==========
+
+    #[test]
+    fn test_get_reference_cover_simple() {
+        let cigar = Cigar::from("100M");
+        assert_eq!(cigar.get_reference_cover(1000), vec![1000, 1100]);
+    }
+
+    #[test]
+    fn test_get_reference_cover_with_gap() {
+        let cigar = Cigar::from("50M100N75M");
+        assert_eq!(cigar.get_reference_cover(1000), vec![1000, 1050, 1150, 1225]);
+    }
+
+    #[test]
+    fn test_get_reference_cover_multiple_gaps() {
+        let cigar = Cigar::from("30M50N40M100N30M");
+        assert_eq!(cigar.get_reference_cover(100), vec![100, 130, 180, 220, 320, 350]);
+    }
+
+    #[test]
+    fn test_get_reference_cover_with_deletion() {
+        let cigar = Cigar::from("50M10D50M");
+        // Deletion creates a gap but doesn't split coverage
+        assert_eq!(cigar.get_reference_cover(1000), vec![1000, 1050, 1060, 1110]);
+    }
+
+    // ========== Display Tests ==========
+
+    #[test]
+    fn test_display_simple() {
+        let cigar = Cigar::from("50M");
+        assert_eq!(format!("{}", cigar), "50M");
+    }
+
+    #[test]
+    fn test_display_complex() {
+        let cigar = Cigar::from("10S35M110N45M20S");
+        assert_eq!(format!("{}", cigar), "10S35M110N45M20S");
+    }
+
+    #[test]
+    fn test_display_all_operations() {
+        let cigar = Cigar::from("5H10S20M5I15D100N30M10S5H");
+        assert_eq!(format!("{}", cigar), "5H10S20M5I15D100N30M10S5H");
+    }
+
+    // ========== Edge Cases ==========
+
+    #[test]
+    fn test_empty_operations() {
+        let cigar = Cigar::from("*");
+        //assert_eq!(cigar.cigar.len(), 0);
+        assert_eq!(cigar.has_skipped(), false);
+        assert_eq!(cigar.get_read_length_from_cigar(), 0);
+    }
+
+    #[test]
+    fn test_single_base_operations() {
+        let cigar = Cigar::from("1M1I1D1N1M");
+        assert_eq!(cigar.get_end_of_aln(100), 104); // 1M + 1D + 1N + 1M
+        assert_eq!(cigar.get_read_length_from_cigar(), 3); // 1M + 1I + 1M
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid CIGAR operation")]
+    fn test_cigar_from_panic() {
+        let _ = Cigar::from("50M10X20M");
+    }
     }
 }
 
