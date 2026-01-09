@@ -231,14 +231,14 @@ pub mod cigar{
 
     impl Cigar{
 
-        /// 
+        /// if the read is clipped at the start return the length of the clipepd part
         pub fn get_start_clipped(&self) ->Option<i64>{
             match self.cigar[0]{
                 CigarOperation::Soft(n) => Some(n),
                 _ => None
             }
         }
-
+        /// if the read is clipped at the end return the length of the clipepd part
         pub fn get_end_clipped(&self) -> Option<i64>{
             match self.cigar.last(){
                 Some(CigarOperation::Soft(n)) => Some(*n),
