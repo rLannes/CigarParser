@@ -214,6 +214,10 @@ pub mod cigar{
 
 
     impl Cigar{
+        /// get a non mutable reference to the underlying vector storing CigarOperation
+        pub fn cigar_operation_ref(&self) -> &Vec<CigarOperation>{
+            &self.cigar
+        }
         /// Checks if the CIGAR string contains any skipped regions (N operations).
         ///
         /// Skipped regions typically represent introns in RNA-seq alignments where
