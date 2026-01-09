@@ -230,6 +230,26 @@ pub mod cigar{
 
 
     impl Cigar{
+
+        /// 
+        pub fn get_start_clipped(&self) ->Option<i64>{
+            match selg.cigar[0]{
+                CigarOperation::Soft(n) => Some(n),
+                _ => None
+            }
+        }
+
+        pub fn get_end_clipped(&self) ->Option<i64>{
+            match self.cigar.last(){
+                CigarOperation::Soft(n) => Some(n),
+                _ => None
+            }
+        }
+
+        /// 
+        pub fn cigar_operation_ref(&self) -> &Vec<CigarOperation>{
+            &self.cigar
+        }
         /// get a non mutable reference to the underlying vector storing CigarOperation
         pub fn cigar_operation_ref(&self) -> &Vec<CigarOperation>{
             &self.cigar
